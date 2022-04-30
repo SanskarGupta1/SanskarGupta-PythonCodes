@@ -1,0 +1,28 @@
+import numpy, cv2
+
+Video = cv2.VideoCapture(0)
+
+IsSach, frame1 = Video.read()
+IsSach, frame2 = Video.read()
+
+while Video.isOpened():
+    Diff = cv2.absdiff(frame1, frame2)
+    GrayDiff = cv2.cvtColor(Diff, cv2.COLOR_BGR2GRAY)
+    BlurDiff = cv2.GaussianBlur(GrayDiff, (5, 5), 0)
+    _, ThreshedDiff = cv2.threshold(BlurDiff, 20, 255, cv2.THRESH_BINARY)
+    DilatedDiff = cv2.dilate(ThreshedDiff, None, iterations=3)
+    DiffContour, _ = cv2.findContours(DilatedDiff, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+
+    cv2.drawContours(frame1, DiffContour,  -1, (0, 255, 0), 2)
+
+    cv2.imshow("Motion detector", frame1)
+
+    frame1 = frame2
+    IsSach, frame2 = Video.read()
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        exit()
+
+
+cv2.destroyAllWindows()
+Video.release()
